@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户满意度调查</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background-color 0.3s;
+        }
+        #game-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        #survey-header {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+        #scene-text {
+            font-size: 20px;
+            margin-bottom: 25px;
+            line-height: 1.8;
+            color: #333;
+            transition: color 0.3s;
+            white-space: pre-line;
+        }
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+            color: #333;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            background-color: #e8e8e8;
+            border-color: #bbb;
+        }
+        #end-message {
+            color: #999;
+            font-style: italic;
+        }
+        #progress-bar {
+            width: 100%;
+            height: 3px;
+            background-color: #eee;
+            margin-bottom: 20px;
+            border-radius: 2px;
+        }
+        #progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        /* 欢迎页面样式 */
+        .welcome-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .welcome-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .start-btn {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 18px;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .start-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* 结局收集页面样式 */
+        .endings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .ending-card {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            cursor: default;
+            transition: all 0.3s;
+        }
+        .ending-card.unlocked {
+            background: #fff0f0;
+            border-color: #ff6666;
+        }
+        .ending-card.locked {
+            opacity: 0.6;
+        }
+        .ending-card-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .ending-card.unlocked .ending-card-title {
+            color: #ff0000;
+        }
+        .ending-card-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* 恐怖模式样式 */
+        body.horror-mode {
+            background-color: #000;
+        }
+        body.horror-mode #game-container {
+            background: #1a0000;
+            box-shadow: 0 0 40px rgba(255,0,0,0.3);
+        }
+        body.horror-mode #scene-text {
+            color: #ff0000;
+        }
+        body.horror-mode #survey-header {
+            color: #660000;
+            border-bottom-color: #330000;
+        }
+
+        /* 闪屏效果 */
+        .flash-effect {
+            animation: flash 0.1s infinite;
+        }
+        @keyframes flash {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        /* 红色闪屏文字 */
+        .glitch-text {
+            animation: redPulse 0.05s infinite;
+            color: #ff0000 !important;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                0 0 40px #ff0000;
+            font-weight: bold;
+        }
+        @keyframes redPulse {
+            0% { 
+                text-shadow: 
+                    0 0 10px #ff0000,
+                    0 0 20px #ff0000,
+                    0 0 40px #ff0000;
+                transform: translate(0);
+            }
+            25% { 
+                text-shadow: 
+                    0 0 15px #ff0000,
+                    0 0 30px #ff0000,
+                    0 0 60px #ff0000;
+                transform: translate(-2px, 1px);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 10px #ff0000,
+                    0 0 20px #ff0000,
+                    0 0 40px #ff0000;
+                transform: translate(2px, -1px);
+            }
+            75% { 
+                text-shadow: 
+                    0 0 15px #ff0000,
+                    0 0 30px #ff0000,
+                    0 0 60px #ff0000;
+                transform: translate(-1px, -2px);
+            }
+            100% { 
+                text-shadow: 
+                    0 0 10px #ff0000,
+                    0 0 20px #ff0000,
+                    0 0 40px #ff0000;
+                transform: translate(1px, 2px);
+            }
+        }
+
+        /* 结局特殊样式 */
+        .ending-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ff0000 !important;
+            text-shadow: 0 0 20px #ff0000;
+            animation: none !important;
+        }
+        .ending-subtitle {
+            font-size: 16px;
+            color: #cc0000;
+            margin-top: 15px;
+            font-weight: normal;
+            text-shadow: none;
+        }
+        .ending-title {
+            font-size: 14px;
+            color: #ff6666;
+            margin-top: 20px;
+            font-style: italic;
+            font-weight: normal;
+            text-shadow: none;
+        }
+
+        @media (max-width: 600px) {
+            #game-container {
+                width: 95%;
+                padding: 20px;
+            }
+            #scene-text {
+                font-size: 18px;
+            }
+            .option-btn, .start-btn {
+                font-size: 15px;
+                padding: 10px;
+            }
+            .endings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="survey-header" style="display: none;">📋 用户满意度调查问卷</div>
+        <div id="progress-bar" style="display: none;">
+            <div id="progress-fill" style="width: 0%"></div>
+        </div>
+        <div id="scene-text">加载中...</div>
+        <div id="options-container"></div>
+    </div>
+
+    <script>
+        // ========== 游戏状态 ==========
+        let gameState = {
+            sanity: 100,
+            insight: 0,
+            noSleepCount: 0,
+            forgetCount: 0,
+            route: "normal",  // 路线标记：normal, insomnia, paranoid, mirror
+            visitedScenes: []  // 记录访问过的场景
+        };
+
+        function resetGameState() {
+            gameState = {
+                sanity: 100,
+                insight: 0,
+                noSleepCount: 0,
+                forgetCount: 0,
+                route: "normal",
+                visitedScenes: []
+            };
+        }
+
+        // ========== 结局收集系统 ==========
+        const allEndings = {
+            normal_ending: {
+                name: "无知的幸福",
+                description: "调查完成。感谢您的参与。"
+            },
+            nightmare_ending: {
+                name: "永夜梦魇",
+                description: "您已被标记。我们会在梦中联系您。"
+            },
+            awakening_ending: {
+                name: "真相大白",
+                description: "你终于看到了真相。可惜，已经太晚了。"
+            },
+            madness_ending: {
+                name: "疯狂深渊",
+                description: "它就在你身后。那是你自己的脸。"
+            },
+            reality_ending: {
+                name: "现实崩塌",
+                description: "你选择了不睡觉。聪明的选择。"
+            },
+            meta_ending: {
+                name: "打破第四面墙",
+                description: "你以为这是一个游戏。"
+            },
+            true_ending: {
+                name: "克苏鲁的召唤",
+                description: "在永恒的宅邸拉莱耶中，长眠的克苏鲁候汝入梦。"
+            }
+        };
+
+        function getUnlockedEndings() {
+            const saved = localStorage.getItem('unlockedEndings');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function unlockEnding(endingId) {
+            const unlocked = getUnlockedEndings();
+            if (!unlocked.includes(endingId)) {
+                unlocked.push(endingId);
+                localStorage.setItem('unlockedEndings', JSON.stringify(unlocked));
+            }
+        }
+
+        // ========== 游戏数据（多分支版本） ==========
+        const scenes = {
+            // ===== 开始 =====
+            "q1": {
+                text: "感谢您参与本次用户满意度调查。请问您的年龄段是？",
+                options: [
+                    { text: "18-25岁", next: "q2_young", effect: {sanity: -5} },
+                    { text: "26-35岁", next: "q2_middle", effect: {sanity: -3} },
+                    { text: "36-50岁", next: "q2_old", effect: {sanity: -1} },
+                    { text: "50岁以上", next: "q2_elder", effect: {sanity: -8} }
+                ]
+            },
+            
+            // ===== 不同年龄段的路线 =====
+            "q2_young": {
+                text: "年轻人，您平均每天使用我们的产品多长时间？",
+                options: [
+                    { text: "1小时以下", next: "q3_a", effect: {sanity: -2} },
+                    { text: "1-3小时", next: "q3_b", effect: {sanity: -5} },
+                    { text: "3-5小时", next: "q3_c", effect: {sanity: -10} },
+                    { text: "5小时以上", next: "q3_d", effect: {sanity: -15, insight: +5} }
+                ]
+            },
+            "q2_middle": {
+                text: "您平均每天使用我们的产品多长时间？",
+                options: [
+                    { text: "1小时以下", next: "q3_a", effect: {sanity: -2} },
+                    { text: "1-3小时", next: "q3_b", effect: {sanity: -5} },
+                    { text: "3-5小时", next: "q3_c", effect: {sanity: -10} },
+                    { text: "5小时以上", next: "q3_d", effect: {sanity: -15, insight: +5} }
+                ]
+            },
+            "q2_old": {
+                text: "您平均每天使用我们的产品多长时间？",
+                options: [
+                    { text: "1小时以下", next: "q3_a", effect: {sanity: -2} },
+                    { text: "1-3小时", next: "q3_b", effect: {sanity: -5} },
+                    { text: "3-5小时", next: "q3_c", effect: {sanity: -10} },
+                    { text: "5小时以上", next: "q3_d", effect: {sanity: -15, insight: +5} }
+                ]
+            },
+            "q2_elder": {
+                text: "您平均每天使用我们的产品多长时间？",
+                options: [
+                    { text: "1小时以下", next: "q3_a", effect: {sanity: -2} },
+                    { text: "1-3小时", next: "q3_b", effect: {sanity: -5} },
+                    { text: "3-5小时", next: "q3_c", effect: {sanity: -10} },
+                    { text: "5小时以上", next: "q3_d", effect: {sanity: -15, insight: +5} }
+                ]
+            },
+            
+            // ===== 满意度分支 =====
+            "q3_a": {
+                text: "您对产品的整体满意度如何？",
+                options: [
+                    { text: "非常满意", next: "q4_normal", effect: {sanity: -3} },
+                    { text: "比较满意", next: "q4_normal", effect: {sanity: -5} },
+                    { text: "一般", next: "q4_normal", effect: {sanity: -8, insight: +3} },
+                    { text: "不满意", next: "q4_angry", effect: {sanity: -12, insight: +5} }
+                ]
+            },
+            "q3_b": {
+                text: "您对产品的整体满意度如何？",
+                options: [
+                    { text: "非常满意", next: "q4_normal", effect: {sanity: -3} },
+                    { text: "比较满意", next: "q4_normal", effect: {sanity: -5} },
+                    { text: "一般", next: "q4_normal", effect: {sanity: -8, insight: +3} },
+                    { text: "不满意", next: "q4_angry", effect: {sanity: -12, insight: +5} }
+                ]
+            },
+            "q3_c": {
+                text: "您对产品的整体满意度如何？",
+                options: [
+                    { text: "非常满意", next: "q4_normal", effect: {sanity: -3} },
+                    { text: "比较满意", next: "q4_normal", effect: {sanity: -5} },
+                    { text: "一般", next: "q4_normal", effect: {sanity: -8, insight: +3} },
+                    { text: "不满意", next: "q4_angry", effect: {sanity: -12, insight: +5} }
+                ]
+            },
+            "q3_d": {
+                text: "您对产品的整体满意度如何？",
+                options: [
+                    { text: "非常满意", next: "q4_normal", effect: {sanity: -3} },
+                    { text: "比较满意", next: "q4_normal", effect: {sanity: -5} },
+                    { text: "一般", next: "q4_normal", effect: {sanity: -8, insight: +3} },
+                    { text: "不满意", next: "q4_angry", effect: {sanity: -12, insight: +5} }
+                ]
+            },
+            
+            // ===== 睡眠问题分支 =====
+            "q4_normal": {
+                text: "您晚上通常几点入睡？",
+                options: [
+                    { text: "22:00之前", next: "q5_normal", effect: {sanity: -5} },
+                    { text: "22:00-24:00", next: "q5_normal", effect: {sanity: -10} },
+                    { text: "00:00-02:00", next: "q5_late", effect: {sanity: -15, insight: +10} },
+                    { text: "我不睡觉", next: "q5_insomnia", effect: {sanity: -20, insight: +15, noSleep: true} }
+                ]
+            },
+            "q4_angry": {
+                text: "您似乎对产品不太满意。那么，您晚上通常几点入睡？",
+                options: [
+                    { text: "22:00之前", next: "q5_normal", effect: {sanity: -8} },
+                    { text: "22:00-24:00", next: "q5_normal", effect: {sanity: -15} },
+                    { text: "00:00-02:00", next: "q5_late", effect: {sanity: -20, insight: +15} },
+                    { text: "我不睡觉", next: "q5_insomnia", effect: {sanity: -25, insight: +20, noSleep: true} }
+                ]
+            },
+            
+            // ===== 声音问题分支 =====
+            "q5_normal": {
+                text: "您是否经常在深夜听到奇怪的声音？",
+                options: [
+                    { text: "从来没有", next: "q6_normal", effect: {sanity: -5} },
+                    { text: "偶尔会", next: "q6_normal", effect: {sanity: -10, insight: +5} },
+                    { text: "经常听到", next: "q6_paranoid", effect: {sanity: -15, insight: +10} },
+                    { text: "那不是我听到的", next: "q6_paranoid", effect: {sanity: -20, insight: +20} }
+                ]
+            },
+            "q5_late": {
+                text: "您睡得很晚。那么，您是否经常在深夜听到奇怪的声音？",
+                options: [
+                    { text: "从来没有", next: "q6_normal", effect: {sanity: -8} },
+                    { text: "偶尔会", next: "q6_normal", effect: {sanity: -15, insight: +10} },
+                    { text: "经常听到", next: "q6_paranoid", effect: {sanity: -20, insight: +15} },
+                    { text: "那不是我听到的", next: "q6_paranoid", effect: {sanity: -25, insight: +25} }
+                ]
+            },
+            "q5_insomnia": {
+                text: "您不睡觉？那您是否经常在深夜听到奇怪的声音？",
+                options: [
+                    { text: "从来没有", next: "q6_normal", effect: {sanity: -10} },
+                    { text: "偶尔会", next: "q6_normal", effect: {sanity: -20, insight: +10} },
+                    { text: "经常听到", next: "q6_paranoid", effect: {sanity: -25, insight: +20} },
+                    { text: "那不是我听到的", next: "q6_paranoid", effect: {sanity: -30, insight: +30} }
+                ]
+            },
+            
+            // ===== 注视问题分支 =====
+            "q6_normal": {
+                text: "您是否相信在您睡着后，有什么东西在注视着您？",
+                options: [
+                    { text: "这是无稽之谈", next: "q7_normal", effect: {sanity: -5} },
+                    { text: "我有时会感到不安", next: "q7_normal", effect: {sanity: -15, insight: +10} },
+                    { text: "是的，我确信有东西在看我", next: "q7_paranoid", effect: {sanity: -25, insight: +20} }
+                ]
+            },
+            "q6_paranoid": {
+                text: "您听到了那些声音。那么，您是否相信在您睡着后，有什么东西在注视着您？",
+                options: [
+                    { text: "这是无稽之谈", next: "q7_normal", effect: {sanity: -10} },
+                    { text: "我有时会感到不安", next: "q7_normal", effect: {sanity: -20, insight: +15} },
+                    { text: "是的，我确信有东西在看我", next: "q7_paranoid", effect: {sanity: -30, insight: +25} }
+                ]
+            },
+            
+            // ===== 重复问题分支 =====
+            "q7_normal": {
+                text: "请再次确认：您晚上通常几点入睡？",
+                options: [
+                    { text: "22:00之前", next: "q8_normal", effect: {sanity: -10} },
+                    { text: "22:00-24:00", next: "q8_normal", effect: {sanity: -15} },
+                    { text: "00:00-02:00", next: "q8_normal", effect: {sanity: -20, insight: +10} },
+                    { text: "我不睡觉", next: "q8_insomnia", effect: {sanity: -25, insight: +15, noSleep: true} }
+                ]
+            },
+            "q7_paranoid": {
+                text: "您看到了它们。请再次确认：您晚上通常几点入睡？",
+                options: [
+                    { text: "22:00之前", next: "q8_normal", effect: {sanity: -15} },
+                    { text: "22:00-24:00", next: "q8_normal", effect: {sanity: -20, insight: +5} },
+                    { text: "00:00-02:00", next: "q8_normal", effect: {sanity: -25, insight: +15} },
+                    { text: "我不睡觉", next: "q8_insomnia", effect: {sanity: -30, insight: +20, noSleep: true} }
+                ]
+            },
+            
+            // ===== 声音重复问题分支 =====
+            "q8_normal": {
+                text: "您之前选择了不同的答案。请重新选择：您是否经常在深夜听到奇怪的声音？",
+                options: [
+                    { text: "从来没有", next: "q9_normal", effect: {sanity: -15} },
+                    { text: "偶尔会", next: "q9_normal", effect: {sanity: -20, insight: +10} },
+                    { text: "经常听到", next: "q9_paranoid", effect: {sanity: -25, insight: +15} },
+                    { text: "那不是我听到的", next: "q9_paranoid", effect: {sanity: -30, insight: +25} }
+                ]
+            },
+            "q8_insomnia": {
+                text: "您又不睡觉？请重新选择：您是否经常在深夜听到奇怪的声音？",
+                options: [
+                    { text: "从来没有", next: "q9_normal", effect: {sanity: -20} },
+                    { text: "偶尔会", next: "q9_normal", effect: {sanity: -25, insight: +15} },
+                    { text: "经常听到", next: "q9_paranoid", effect: {sanity: -30, insight: +20} },
+                    { text: "那不是我听到的", next: "q9_paranoid", effect: {sanity: -35, insight: +30} }
+                ]
+            },
+            
+            // ===== 确定问题分支 =====
+            "q9_normal": {
+                text: "您确定吗？",
+                options: [
+                    { text: "确定", next: "q10_normal", effect: {sanity: -10} },
+                    { text: "不确定", next: "q10_normal", effect: {sanity: -20, insight: +15} },
+                    { text: "我不记得了", next: "q10_forget", effect: {sanity: -25, insight: +20, forget: true} }
+                ]
+            },
+            "q9_paranoid": {
+                text: "您确定吗？那些声音，那些注视，您确定吗？",
+                options: [
+                    { text: "确定", next: "q10_paranoid", effect: {sanity: -15} },
+                    { text: "不确定", next: "q10_paranoid", effect: {sanity: -25, insight: +20} },
+                    { text: "我不记得了", next: "q10_forget", effect: {sanity: -30, insight: +25, forget: true} }
+                ]
+            },
+            
+            // ===== 镜子问题分支 =====
+            "q10_normal": {
+                text: "最后一个问题：您是否曾经在镜子里看到过不应该存在的东西？",
+                options: [
+                    { text: "没有", next: "transition1", effect: {sanity: -10} },
+                    { text: "有过", next: "transition1_mirror", effect: {sanity: -20, insight: +20} },
+                    { text: "那不是镜子", next: "transition1_mirror", effect: {sanity: -30, insight: +30} }
+                ]
+            },
+            "q10_paranoid": {
+                text: "最后一个问题：您是否曾经在镜子里看到过不应该存在的东西？",
+                options: [
+                    { text: "没有", next: "transition1", effect: {sanity: -15} },
+                    { text: "有过", next: "transition1_mirror", effect: {sanity: -25, insight: +25} },
+                    { text: "那不是镜子", next: "transition1_mirror", effect: {sanity: -35, insight: +35} }
+                ]
+            },
+            "q10_forget": {
+                text: "最后一个问题：您是否曾经在镜子里看到过不应该存在的东西？",
+                options: [
+                    { text: "没有", next: "transition1", effect: {sanity: -20, forget: true} },
+                    { text: "有过", next: "transition1_mirror", effect: {sanity: -30, insight: +25, forget: true} },
+                    { text: "那不是镜子", next: "transition1_mirror", effect: {sanity: -40, insight: +35, forget: true} }
+                ]
+            },
+            
+            // ===== 过渡场景 =====
+            "transition1": {
+                text: "感谢您的回答。",
+                options: [
+                    { text: "完成问卷", next: "horror_intro" }
+                ]
+            },
+            "transition1_mirror": {
+                text: "感谢您的回答。关于镜子的回答，我们会特别记录。",
+                options: [
+                    { text: "完成问卷", next: "horror_intro_mirror" }
+                ]
+            },
+            
+            // ===== 恐怖转折 =====
+            "horror_intro": {
+                text: "它醒了。",
+                options: [
+                    { text: "什么？", next: "horror1" }
+                ]
+            },
+            "horror_intro_mirror": {
+                text: "它醒了。它在镜子里看着你。",
+                options: [
+                    { text: "什么？", next: "horror1_mirror" }
+                ]
+            },
+            "horror1": {
+                text: "它一直在等你回答这些问题。",
+                options: [
+                    { text: "你是谁？", next: "horror2" }
+                ]
+            },
+            "horror1_mirror": {
+                text: "它一直在等你回答这些问题。特别是在镜子里。",
+                options: [
+                    { text: "你是谁？", next: "horror2_mirror" }
+                ]
+            },
+            "horror2": {
+                text: "你不是在回答问卷。你是在回应它的召唤。",
+                options: [
+                    { text: "我不明白", next: "horror3" },
+                    { text: "放我走", next: "horror3" }
+                ]
+            },
+            "horror2_mirror": {
+                text: "你不是在回答问卷。你是在回应它的召唤。而镜子是它的眼睛。",
+                options: [
+                    { text: "我不明白", next: "horror3_mirror" },
+                    { text: "放我走", next: "horror3_mirror" }
+                ]
+            },
+            "horror3": {
+                text: "太晚了。你已经看到了问题。问题也看到了你。",
+                options: [
+                    { text: "不——", next: "flash1" }
+                ]
+            },
+            "horror3_mirror": {
+                text: "太晚了。你已经看到了问题。问题也看到了你。镜子里的一切都看到了。",
+                options: [
+                    { text: "不——", next: "flash1_mirror" }
+                ]
+            },
+            
+            // ===== 闪屏场景 =====
+            "flash1": {
+                text: "它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了",
+                options: []
+            },
+            "flash1_mirror": {
+                text: "它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了它醒了",
+                options: []
+            },
+            "flash2": {
+                text: "你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗你看到了吗",
+                options: []
+            },
+            "flash3": {
+                text: "它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后它就在你身后",
+                options: []
+            },
+            "flash4": {
+                text: "不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头不要回头",
+                options: []
+            },
+            "flash5": {
+                text: "你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了你已经回头了",
+                options: []
+            },
+            
+            // ===== 七个结局（保持不变） =====
+            "normal_ending": {
+                text: "调查完成。感谢您的参与。",
+                subtitle: "您已安全离开，但总觉得哪里不对劲。",
+                endingType: "normal",
+                endingId: "normal_ending"
+            },
+            "nightmare_ending": {
+                text: "您已被标记。我们会在梦中联系您。",
+                subtitle: "从那天起，你每晚都梦见同一个问题：您睡着了吗？",
+                endingType: "nightmare",
+                endingId: "nightmare_ending"
+            },
+            "awakening_ending": {
+                text: "你终于看到了真相。可惜，已经太晚了。",
+                subtitle: "问卷从来就不是问卷。每一道题都是唤醒它的咒语。",
+                endingType: "awakening",
+                endingId: "awakening_ending"
+            },
+            "madness_ending": {
+                text: "它就在你身后它就在你身后它就在你身后\n你回头了你回头了你回头了\n你看到了你看到了你看到了\n那是你自己的脸。",
+                subtitle: "你成为了恐怖的一部分。",
+                endingType: "madness",
+                endingId: "madness_ending"
+            },
+            "reality_ending": {
+                text: "你选择了不睡觉。聪明的选择。",
+                subtitle: "但你真的确定，现在的你是醒着的吗？",
+                endingType: "reality",
+                endingId: "reality_ending"
+            },
+            "meta_ending": {
+                text: "你以为这是一个游戏。",
+                subtitle: "你以为你只是随便点点按钮。但问卷知道你的名字。它一直都知道。",
+                endingType: "meta",
+                endingId: "meta_ending"
+            },
+            "true_ending": {
+                text: "问卷完成了。最后一个回答者已经出现。门开了。",
+                subtitle: "在永恒的宅邸拉莱耶中，长眠的克苏鲁候汝入梦。",
+                endingType: "true",
+                endingId: "true_ending"
+            }
+        };
+
+        // ========== 游戏逻辑 ==========
+        let currentSceneId = "welcome";
+        const flashScenes = ["flash1", "flash1_mirror", "flash2", "flash3", "flash4", "flash5"];
+        const endingNames = {
+            normal: "【结局：无知的幸福】",
+            nightmare: "【结局：永夜梦魇】",
+            awakening: "【结局：真相大白】",
+            madness: "【结局：疯狂深渊】",
+            reality: "【结局：现实崩塌】",
+            meta: "【结局：打破第四面墙】",
+            true: "【真结局：克苏鲁的召唤】"
+        };
+
+        function showScene(sceneId) {
+            if (sceneId === "restart") {
+                resetGameState();
+                showScene("q1");
+                return;
+            }
+
+            const scene = scenes[sceneId];
+            
+            if (sceneId === "welcome") {
+                showWelcomePage();
+                return;
+            }
+            
+            if (sceneId === "endings") {
+                showEndingsPage();
+                return;
+            }
+
+            if (!scene) {
+                console.error("场景不存在:", sceneId);
+                return;
+            }
+
+            // 记录访问的场景
+            if (!gameState.visitedScenes.includes(sceneId)) {
+                gameState.visitedScenes.push(sceneId);
+            }
+
+            // 显示游戏界面元素
+            document.getElementById("survey-header").style.display = "block";
+            document.getElementById("progress-bar").style.display = "block";
+
+            // 清除之前的闪屏效果
+            clearFlashEffects();
+
+            // 更新文字
+            const textElement = document.getElementById("scene-text");
+            textElement.innerText = scene.text;
+
+            // 检查场景类型并应用相应样式
+            if (flashScenes.includes(sceneId)) {
+                startFlashEffects(textElement, sceneId);
+            } else if (sceneId.includes("ending")) {
+                if (scene.endingId) {
+                    unlockEnding(scene.endingId);
+                }
+                showEnding(scene);
+                return;
+            } else if (sceneId.startsWith("horror") || sceneId === "transition1" || sceneId === "transition1_mirror") {
+                document.body.classList.add("horror-mode");
+                textElement.classList.add("glitch-text");
+                document.getElementById("survey-header").innerText = "⚠️ 系统错误";
+            } else {
+                resetToNormalMode();
+                document.getElementById("survey-header").innerText = "📋 用户满意度调查问卷";
+            }
+
+            // 更新进度条
+            updateProgress(sceneId);
+
+            // 清空并重新生成选项按钮
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            // 闪屏场景处理
+            if (flashScenes.includes(sceneId)) {
+                const flashOrder = ["flash1", "flash2", "flash3", "flash4", "flash5"];
+                const mirrorFlashOrder = ["flash1_mirror", "flash2", "flash3", "flash4", "flash5"];
+                
+                const currentOrder = sceneId === "flash1_mirror" ? mirrorFlashOrder : flashOrder;
+                const currentIndex = currentOrder.indexOf(sceneId);
+                
+                setTimeout(() => {
+                    if (currentIndex < currentOrder.length - 1) {
+                        showScene(currentOrder[currentIndex + 1]);
+                    } else {
+                        const endingId = determineEnding();
+                        showScene(endingId);
+                    }
+                }, 2000);
+                return;
+            }
+
+            // 生成选项按钮
+            if (scene.options && scene.options.length > 0) {
+                scene.options.forEach(option => {
+                    const btn = document.createElement("button");
+                    btn.className = "option-btn";
+                    btn.innerText = option.text;
+                    btn.onclick = () => {
+                        handleOptionClick(option);
+                    };
+                    optionsContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function resetToNormalMode() {
+            const textElement = document.getElementById("scene-text");
+            const container = document.getElementById("game-container");
+            const body = document.body;
+            
+            body.classList.remove("horror-mode");
+            textElement.classList.remove("glitch-text", "ending-text", "flash-effect");
+            
+            textElement.style.cssText = "";
+            container.style.animation = "";
+            container.style.boxShadow = "";
+            body.style.backgroundColor = "#f5f5f5";
+            
+            textElement.style.color = "#333";
+            textElement.style.fontSize = "20px";
+            textElement.style.fontWeight = "normal";
+            textElement.style.textShadow = "none";
+            
+            container.style.backgroundColor = "white";
+            container.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
+            
+            const progressFill = document.getElementById("progress-fill");
+            if (progressFill) {
+                progressFill.style.backgroundColor = "#4CAF50";
+            }
+        }
+
+        function showWelcomePage() {
+            document.getElementById("survey-header").style.display = "none";
+            document.getElementById("progress-bar").style.display = "none";
+            
+            resetToNormalMode();
+            
+            const textElement = document.getElementById("scene-text");
+            const optionsContainer = document.getElementById("options-container");
+            
+            textElement.innerHTML = `
+                <div class="welcome-title">用户满意度调查</div>
+                <div class="welcome-subtitle">
+                    感谢您参与本次调查。<br>
+                    我们将询问一些关于您日常习惯的问题。<br>
+                    请如实回答。这很重要。
+                </div>
+            `;
+            
+            optionsContainer.innerHTML = '';
+            
+            const startBtn = document.createElement("button");
+            startBtn.className = "start-btn";
+            startBtn.innerText = "开始测试";
+            startBtn.onclick = () => {
+                resetGameState();
+                showScene("q1");
+            };
+            optionsContainer.appendChild(startBtn);
+            
+            const unlockedEndings = getUnlockedEndings();
+            if (unlockedEndings.length > 0) {
+                const viewEndingsBtn = document.createElement("button");
+                viewEndingsBtn.className = "option-btn";
+                viewEndingsBtn.style.marginTop = "15px";
+                viewEndingsBtn.innerText = `查看结局 (${unlockedEndings.length}/${Object.keys(allEndings).length})`;
+                viewEndingsBtn.onclick = () => {
+                    showEndingsPage();
+                };
+                optionsContainer.appendChild(viewEndingsBtn);
+            }
+        }
+
+        function showEndingsPage() {
+            document.getElementById("survey-header").style.display = "none";
+            document.getElementById("progress-bar").style.display = "none";
+            
+            resetToNormalMode();
+            
+            const textElement = document.getElementById("scene-text");
+            const optionsContainer = document.getElementById("options-container");
+            
+            const unlockedEndings = getUnlockedEndings();
+            
+            let endingsHTML = '<div class="welcome-title">已解锁的结局</div>';
+            endingsHTML += '<div class="endings-grid">';
+            
+            Object.keys(allEndings).forEach(endingId => {
+                const ending = allEndings[endingId];
+                const isUnlocked = unlockedEndings.includes(endingId);
+                
+                endingsHTML += `
+                    <div class="ending-card ${isUnlocked ? 'unlocked' : 'locked'}">
+                        <div class="ending-card-title">
+                            ${isUnlocked ? ending.name : '？？？'}
+                        </div>
+                        <div class="ending-card-content">
+                            ${isUnlocked ? ending.description : '尚未解锁'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            endingsHTML += '</div>';
+            
+            textElement.innerHTML = endingsHTML;
+            
+            optionsContainer.innerHTML = '';
+            
+            const backBtn = document.createElement("button");
+            backBtn.className = "option-btn";
+            backBtn.innerText = "返回主页";
+            backBtn.onclick = () => {
+                showWelcomePage();
+            };
+            optionsContainer.appendChild(backBtn);
+        }
+
+        function showEnding(scene) {
+            const textElement = document.getElementById("scene-text");
+            const optionsContainer = document.getElementById("options-container");
+            
+            document.body.classList.remove("horror-mode");
+            textElement.classList.remove("glitch-text", "flash-effect");
+            document.getElementById("game-container").style.animation = "";
+            
+            document.body.classList.add("horror-mode");
+            textElement.classList.add("ending-text");
+            
+            let endingHTML = scene.text;
+            
+            if (scene.subtitle) {
+                endingHTML += `<div class="ending-subtitle">${scene.subtitle}</div>`;
+            }
+            
+            if (scene.endingType && endingNames[scene.endingType]) {
+                endingHTML += `<div class="ending-title">${endingNames[scene.endingType]}</div>`;
+            }
+            
+            textElement.innerHTML = endingHTML;
+            
+            optionsContainer.innerHTML = '';
+            
+            const restartBtn = document.createElement("button");
+            restartBtn.className = "option-btn";
+            restartBtn.innerText = "重新开始游戏";
+            restartBtn.onclick = () => {
+                resetGameState();
+                showScene("q1");
+            };
+            optionsContainer.appendChild(restartBtn);
+            
+            const homeBtn = document.createElement("button");
+            homeBtn.className = "option-btn";
+            homeBtn.innerText = "返回主页";
+            homeBtn.onclick = () => {
+                showWelcomePage();
+            };
+            optionsContainer.appendChild(homeBtn);
+            
+            const viewEndingsBtn = document.createElement("button");
+            viewEndingsBtn.className = "option-btn";
+            viewEndingsBtn.innerText = "查看所有结局";
+            viewEndingsBtn.onclick = () => {
+                showEndingsPage();
+            };
+            optionsContainer.appendChild(viewEndingsBtn);
+        }
+
+        function handleOptionClick(option) {
+            if (option.effect) {
+                if (option.effect.sanity) {
+                    gameState.sanity = Math.max(0, Math.min(100, gameState.sanity + option.effect.sanity));
+                }
+                if (option.effect.insight) {
+                    gameState.insight += option.effect.insight;
+                }
+                if (option.effect.noSleep) {
+                    gameState.noSleepCount++;
+                }
+                if (option.effect.forget) {
+                    gameState.forgetCount++;
+                }
+            }
+            
+            updateInterfaceBySanity();
+            showScene(option.next);
+        }
+
+        function determineEnding() {
+            const {sanity, insight, noSleepCount, forgetCount} = gameState;
+            
+            console.log("当前状态 - 理智:", sanity, "洞察:", insight, "不睡觉次数:", noSleepCount, "不记得次数:", forgetCount);
+            
+            if (insight > 90 && sanity < 20) {
+                return "true_ending";
+            } else if (noSleepCount >= 2) {
+                return "reality_ending";
+            } else if (forgetCount >= 2) {
+                return "meta_ending";
+            } else if (sanity < 30) {
+                return "madness_ending";
+            } else if (insight > 70 && sanity > 50) {
+                return "awakening_ending";
+            } else if (sanity < 60 && insight < 30) {
+                return "nightmare_ending";
+            } else {
+                return "normal_ending";
+            }
+        }
+
+        function updateInterfaceBySanity() {
+            const body = document.body;
+            const container = document.getElementById("game-container");
+            
+            if (gameState.sanity < 30) {
+                body.style.backgroundColor = "#1a0000";
+                container.style.boxShadow = "0 0 60px rgba(255,0,0,0.5)";
+            } else if (gameState.sanity < 60) {
+                body.style.backgroundColor = "#2a1a1a";
+                container.style.boxShadow = "0 0 30px rgba(255,0,0,0.3)";
+            } else {
+                body.style.backgroundColor = "#f5f5f5";
+                container.style.boxShadow = "0 4px 20px rgba(0,0,0,0.1)";
+            }
+        }
+
+        function startFlashEffects(textElement, sceneId) {
+            textElement.classList.add("flash-effect", "glitch-text");
+            document.body.classList.add("horror-mode");
+            document.getElementById("survey-header").innerText = "⚠️ 系统错误";
+            document.getElementById("game-container").style.animation = "shake 0.1s infinite";
+        }
+
+        function clearFlashEffects() {
+            const textElement = document.getElementById("scene-text");
+            textElement.classList.remove("flash-effect", "glitch-text", "ending-text");
+            document.getElementById("game-container").style.animation = "";
+        }
+
+        function updateProgress(sceneId) {
+            const progressFill = document.getElementById("progress-fill");
+            const totalScenes = Object.keys(scenes).filter(key => 
+                key.startsWith("q") || key.startsWith("transition") || key.startsWith("horror") || key.startsWith("flash")
+            ).length;
+            
+            const sceneIndex = gameState.visitedScenes.length;
+            const progress = Math.min((sceneIndex / totalScenes) * 100, 100);
+            
+            progressFill.style.width = progress + "%";
+            
+            if (sceneId.startsWith("horror") || sceneId.startsWith("flash") || sceneId.startsWith("transition")) {
+                progressFill.style.backgroundColor = "#ff0000";
+            } else {
+                progressFill.style.backgroundColor = "#4CAF50";
+            }
+        }
+
+        // 添加震动动画
+        const styleSheet = document.createElement("style");
+        styleSheet.textContent = `
+            @keyframes shake {
+                0% { transform: translate(0, 0); }
+                25% { transform: translate(-5px, 5px); }
+                50% { transform: translate(5px, -5px); }
+                75% { transform: translate(-5px, -5px); }
+                100% { transform: translate(5px, 5px); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // 启动游戏
+        showScene("welcome");
+    </script>
+</body>
+</html>
